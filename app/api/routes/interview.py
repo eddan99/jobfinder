@@ -38,7 +38,9 @@ async def answer_interview(body: InterviewAnswerRequest) -> InterviewAnswerRespo
     session_store.update_profile(body.session_id, merged_profile)
 
     if not merged_profile.is_complete:
-        return InterviewAnswerResponse(is_complete=False, next_question=next_question)
+        missing = _profile_service.missing_fields(merged_profile)
+        fallback = f"Kan du berätta mer om din {missing[0].replace('_', ' ')}?"
+        return InterviewAnswerResponse(is_complete=False, next_question=next_question or fallback)
 
     return InterviewAnswerResponse(
         is_complete=True,
